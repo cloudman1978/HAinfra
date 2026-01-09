@@ -9,6 +9,7 @@ jobs:
   terraform:
     name: Terraform Init → Plan → Apply
     runs-on: ubuntu-latest
+    environment: dev
     env:
       TF_IN_AUTOMATION: true
 
@@ -31,9 +32,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init -input=false \
-            -backend-config="bucket=${{ secrets.S3_BACKEND_BUCKET }}" \
-            -backend-config="key=${{ secrets.S3_BACKEND_KEY }}" \
-            -backend-config="region=${{ secrets.S3_BACKEND_REGION }}"
+            -backend-config="bucket=${{ secrets.S3_BACKEND_BUCKET }}" 
 
       - name: Terraform Validate
         run: terraform validate -no-color || true
