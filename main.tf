@@ -41,3 +41,5 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "peering_accpeter
     Side = "Acceptor"
   }
 }
+
+
