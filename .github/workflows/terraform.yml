@@ -44,3 +44,9 @@ jobs:
       - name: Terraform Apply
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: terraform apply -input=false -auto-approve tfplan 
+      - name: Upload Terraform artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+            name: ec2-key
+            path: ec2-key.pem
