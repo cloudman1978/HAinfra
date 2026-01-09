@@ -5,7 +5,7 @@ Terraform does not automatically accept `var.*` values inside backend blocks dur
 `terraform init`. Provide these values via `terraform init -backend-config=...` or
 set them in CI as secrets and pass them to `terraform init`.
 */
-
+/*
 variable "s3_backend_bucket" {
   description = "Name of the S3 bucket to store the Terraform state"
   type        = string
@@ -22,3 +22,4 @@ variable "s3_backend_region" {
   type        = string
   default     = "us-east-1"
 }
+*/
