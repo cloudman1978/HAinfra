@@ -40,7 +40,7 @@ jobs:
 
       - name: Terraform Plan
         id: tfplan
-        run: terraform plan -out=tfplan -input=false -no-color 
+        run: terraform plan -out=tfplan -input=false -no-color -var="instance_ami=${{ vars.instance_ami || env.instance_ami }}"
       - name: Terraform Apply
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: terraform apply -input=false -auto-approve tfplan 
