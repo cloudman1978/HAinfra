@@ -32,7 +32,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init -input=false \
-            -backend-config="bucket=${{ secrets.S3_BACKEND_BUCKET }}" \
+            -backend-config="bucket=${{ vars.S3_BACKEND_BUCKET }}" \
             -backend-config="key=${{ vars.TF_STATE_KEY }}" \
 
       - name: Terraform Validate
