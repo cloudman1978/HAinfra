@@ -23,7 +23,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "tgw_source_peering" {
 }
 
 data "aws_ec2_transit_gateway_peering_attachment" "tgw_destination_peering_data" {
-  depends_on = [aws_ec2_transit_gateway_peering_attachment.example_source_peering]
+  depends_on = [aws_ec2_transit_gateway_peering_attachment.tgw_source_peering]
   filter {
     name   = "transit-gateway-id"
     values = [aws_ec2_transit_gateway.tgw_b.id]
@@ -35,7 +35,7 @@ data "aws_ec2_transit_gateway_peering_attachment" "tgw_destination_peering_data"
 }
 
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "peering_accpeter" {
-  transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.example_destination_peering_data.id
+  transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.tgw_destination_peering_data.id
   tags = {
     Name = "terraform-example"
     Side = "Acceptor"
