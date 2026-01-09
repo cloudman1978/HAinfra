@@ -128,3 +128,75 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "vpc_ireland_tgw_attachment" {
 }
 
 
+# 11. Create Internet Gateway for VPC "fr"
+resource "aws_internet_gateway" "vpc_fr_igw" {
+  vpc_id = aws_vpc.vpc_fr.id
+  tags = {
+    Name = "vpc-fr-igw"
+  }
+}
+
+# 12. Create public subnet in VPC "fr"
+resource "aws_subnet" "vpc_fr_public" {
+  vpc_id                  = aws_vpc.vpc_fr.id
+  cidr_block              = "10.0.3.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "vpc-fr-public-subnet"
+  }
+}
+
+# 13. Create route table for public subnet
+resource "aws_route_table" "vpc_fr_public_rt" {
+  vpc_id = aws_vpc.vpc_fr.id
+  route {
+    cidr_block      = "0.0.0.0/0"
+    gateway_id      = aws_internet_gateway.vpc_fr_igw.id
+  }
+  tags = {
+    Name = "vpc-fr-public-rt"
+  }
+}
+
+# 14. Associate route table with public subnet
+resource "aws_route_table_association" "vpc_fr_public_rt_assoc" {
+  subnet_id      = aws_subnet.vpc_fr_public.id
+  route_table_id = aws_route_table.vpc_fr_public_rt.id
+}
+
+# 15. Create EC2 instance in public subnet
+resource "aws_instance" "vpc_fr_public_instance" {
+  ami                    = var.instance_ami
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.vpc_fr_public.id
+  key_name               = aws_key_pair.ec2_keypair.key_name
+  associate_public_ip_address = true
+  tags = {
+    Name = "vpc-fr-public-instance"
+  }
+}
+
+variable "instance_ami" {
+  description = "AMI ID for the EC2 instance"
+  type        = string
+}
+
+# Create local private key
+resource "tls_private_key" "ec2_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Save private key to local file
+resource "local_file" "private_key" {
+  filename        = "${path.module}/ec2-key.pem"
+  content         = tls_private_key.ec2_key.private_key_pem
+  file_permission = "0600"
+}
+
+# Create AWS key pair
+resource "aws_key_pair" "ec2_keypair" {
+  key_name   = "ec2-keypair"
+  public_key = tls_private_key.ec2_key.public_key_openssh
+}
