@@ -206,11 +206,45 @@ output "vpc_fr_public_instance_ip" {
   value       = aws_instance.vpc_fr_public_instance.public_ip
 }
 
+resource "aws_security_group" "vpc_ireland_private_sg" {
+  name        = "vpc-ireland-private-sg"
+  description = "Allow SSH and ICMP from 10.0.0.0/8"
+  vpc_id      = aws_vpc.vpc_ireland.id
+
+  ingress {
+    description = "SSH from 10.0.0.0/8"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+
+  ingress {
+    description = "ICMP from 10.0.0.0/8"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "vpc-ireland-private-sg"
+  }
+}
 resource "aws_instance" "vpc_ireland_private_instance" {
   ami                         = var.instance_ami
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.vpc_ireland_private.id
   key_name                    = aws_key_pair.ec2_keypair.key_name
+  vpc_security_group_ids = [aws_security_group.vpc_ireland_private_sg.id]
   associate_public_ip_address = false
   tags = {
     Name = "vpc-ireland-private-instance"
