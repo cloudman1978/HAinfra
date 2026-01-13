@@ -205,3 +205,19 @@ output "vpc_fr_public_instance_ip" {
   description = "Public IP of the vpc-fr public EC2 instance"
   value       = aws_instance.vpc_fr_public_instance.public_ip
 }
+
+resource "aws_instance" "vpc_ireland_private_instance" {
+  ami                         = var.instance_ami
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.vpc_ireland_private.id
+  key_name                    = aws_key_pair.ec2_keypair.key_name
+  associate_public_ip_address = false
+  tags = {
+    Name = "vpc-ireland-private-instance"
+  }
+}
+
+output "vpc_ireland_private_instance_private_ip" {
+  description = "Private IP of the vpc-ireland private EC2 instance"
+  value       = aws_instance.vpc_ireland_private_instance.private_ip
+}
