@@ -200,3 +200,8 @@ resource "aws_key_pair" "ec2_keypair" {
   key_name   = "ec2-keypair"
   public_key = tls_private_key.ec2_key.public_key_openssh
 }
+
+output "vpc_fr_public_instance_ip" {
+  description = "Public IP of the vpc-fr public EC2 instance"
+  value       = aws_instance.vpc_fr_public_instance.public_ip
+}
