@@ -180,6 +180,7 @@ resource "aws_instance" "vpc_fr_public_instance" {
 variable "instance_ami" {
   description = "AMI ID for the EC2 instance"
   type        = string
+  
 }
 
 # Create local private key
@@ -211,20 +212,20 @@ resource "aws_security_group" "vpc_ireland_private_sg" {
   description = "Allow SSH and ICMP from 10.0.0.0/8"
   vpc_id      = aws_vpc.vpc_ireland.id
 
-  ingress {
-    description = "SSH from 10.0.0.0/8"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
-  }
+    ingress {
+      description = "SSH from everywhere"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
 
   ingress {
-    description = "ICMP from 10.0.0.0/8"
+    description = "ICMP from 0.0.0.0/0"
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["10.0.0.0/8"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -255,3 +256,5 @@ output "vpc_ireland_private_instance_private_ip" {
   description = "Private IP of the vpc-ireland private EC2 instance"
   value       = aws_instance.vpc_ireland_private_instance.private_ip
 }
+
+
