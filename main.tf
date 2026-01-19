@@ -258,3 +258,51 @@ output "vpc_ireland_private_instance_private_ip" {
 }
 
 
+###### on premise VPC vpc_ireland
+
+# 16. Create VPC "paris-onprem"
+resource "aws_vpc" "vpc_paris_onprem" {
+  cidr_block           = "10.2.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+  tags = {
+    Name = "vpc-paris-onprem"
+  }
+}
+
+# 17. Create Internet Gateway for VPC "paris-onprem"
+resource "aws_internet_gateway" "vpc_paris_onprem_igw" {
+  vpc_id = aws_vpc.vpc_paris_onprem.id
+  tags = {
+    Name = "vpc-paris-onprem-igw"
+  }
+}
+
+# 18. Create public subnet in VPC "paris-onprem"
+resource "aws_subnet" "vpc_paris_onprem_public" {
+  vpc_id                  = aws_vpc.vpc_paris_onprem.id
+  cidr_block              = "10.2.1.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "vpc-paris-onprem-public-subnet"
+  }
+}
+
+# 19. Create route table for paris-onprem public subnet
+resource "aws_route_table" "vpc_paris_onprem_public_rt" {
+  vpc_id = aws_vpc.vpc_paris_onprem.id
+  route {
+    cidr_block      = "0.0.0.0/0"
+    gateway_id      = aws_internet_gateway.vpc_paris_onprem_igw.id
+  }
+  tags = {
+    Name = "vpc-paris-onprem-public-rt"
+  }
+}
+
+# 20. Associate route table with paris-onprem public subnet
+resource "aws_route_table_association" "vpc_paris_onprem_public_rt_assoc" {
+  subnet_id      = aws_subnet.vpc_paris_onprem_public.id
+  route_table_id = aws_route_table.vpc_paris_onprem_public_rt.id
+}
