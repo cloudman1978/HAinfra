@@ -334,3 +334,65 @@ resource "aws_route_table_association" "vpc_paris_onprem_public_rt_assoc" {
   subnet_id      = aws_subnet.vpc_paris_onprem_public.id
   route_table_id = aws_route_table.vpc_paris_onprem_public_rt.id
 }
+
+
+# Security group for VPC "paris-onprem" public instance
+resource "aws_security_group" "vpc_paris_onprem_public_sg" {
+  name        = "vpc-paris-onprem-public-sg"
+  description = "Allow SSH and VPN traffic"
+  vpc_id      = aws_vpc.vpc_paris_onprem.id
+
+  ingress {
+    description = "SSH from everywhere"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "VPN UDP 500"
+    from_port   = 500
+    to_port     = 500
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "VPN UDP 4500"
+    from_port   = 4500
+    to_port     = 4500
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "vpc-paris-onprem-public-sg"
+  }
+}
+
+# 21. Create EC2 instance in paris-onprem public subnet
+resource "aws_instance" "vpc_paris_onprem_public_instance" {
+  ami                         = var.instance_ami
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.vpc_paris_onprem_public.id
+  key_name                    = aws_key_pair.ec2_keypair.key_name
+  vpc_security_group_ids      = [aws_security_group.vpc_paris_onprem_public_sg.id]
+  associate_public_ip_address = true
+  tags = {
+    Name = "vpc-paris-onprem-public-instance"
+  }
+}
+
+output "vpc_paris_onprem_public_instance_ip" {
+  description = "Public IP of the vpc-paris-onprem public EC2 instance"
+  value       = aws_instance.vpc_paris_onprem_public_instance.public_ip
+}
