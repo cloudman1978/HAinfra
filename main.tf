@@ -396,3 +396,39 @@ output "vpc_paris_onprem_public_instance_ip" {
   description = "Public IP of the vpc-paris-onprem public EC2 instance"
   value       = aws_instance.vpc_paris_onprem_public_instance.public_ip
 }
+
+# 22. Create VPN Gateway for VPC "paris-onprem"
+resource "aws_vpn_gateway" "vpc_paris_onprem_vpn_gw" {
+  vpc_id = aws_vpc.vpc_paris_onprem.id
+  tags = {
+    Name = "vpc-paris-onprem-vpn-gw"
+  }
+}
+
+# 23. Create Customer Gateway for Paris VPC
+resource "aws_customer_gateway" "paris_customer_gw" {
+  bgp_asn    = 65000
+  ip_address = aws_instance.vpc_paris_onprem_public_instance.public_ip # Replace with the public IP of the Paris VPC
+  type       = "ipsec.1"
+  tags = {
+    Name = "paris-customer-gateway"
+  }
+}
+
+# 24. Create VPN Connection
+resource "aws_vpn_connection" "paris_vpn_connection" {
+  vpn_gateway_id      = aws_vpn_gateway.vpc_paris_onprem_vpn_gw.id
+  customer_gateway_id = aws_customer_gateway.paris_customer_gw.id
+  type                = "ipsec.1"
+  static_routes_only  = true
+
+  tags = {
+    Name = "paris-vpn-connection"
+  }
+}
+
+# 25. Create VPN Connection Route
+resource "aws_vpn_connection_route" "paris_vpn_route" {
+  vpn_connection_id = aws_vpn_connection.paris_vpn_connection.id
+  destination_cidr_block = "10.2.0.0/16" # Replace with the CIDR block of the on-prem VPC
+}
