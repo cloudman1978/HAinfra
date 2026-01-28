@@ -1,3 +1,13 @@
+variable "instance_ids" {
+  description = "Map of AWS regions to Amazon Linux AMI IDs"
+  type        = map(string)
+  default = {
+    eu-west-1 = "ami-0d71ea30463e0ff8d"
+    eu-west-3 = "ami-0c55b159cbfafe1f0"
+  }
+}
+
+
 /*
 Variables for configuring the remote S3 backend.
 These variables are provided as references for documentation and local usage.
